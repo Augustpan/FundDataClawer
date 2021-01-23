@@ -3,14 +3,14 @@
 import pandas
 
 def clean_up(fund_id):
-    aa = pandas.read_csv("save/AssetAllocation_{}.csv".format(fund_id))
-    bh = pandas.read_csv("save/BondHolding_{}.csv".format(fund_id))
-    nav = pandas.read_csv("save/NetAssetValue_{}.csv".format(fund_id))
-    fr = pandas.read_csv("save/Rating_{}.csv".format(fund_id))
-    sa = pandas.read_csv("save/SectorAllocation_{}.csv".format(fund_id))
-    sh = pandas.read_csv("save/StockHolding_{}.csv".format(fund_id))
-    tr = pandas.read_csv("save/TurnoverRate_{}.csv".format(fund_id))
-    hs = pandas.read_csv("save/HolderStructure_{}.csv".format(fund_id))
+    aa = pandas.read_csv("raw/AssetAllocation_{}.csv".format(fund_id))
+    bh = pandas.read_csv("raw/BondHolding_{}.csv".format(fund_id))
+    nav = pandas.read_csv("raw/NetAssetValue_{}.csv".format(fund_id))
+    fr = pandas.read_csv("raw/Rating_{}.csv".format(fund_id))
+    sa = pandas.read_csv("raw/SectorAllocation_{}.csv".format(fund_id))
+    sh = pandas.read_csv("raw/StockHolding_{}.csv".format(fund_id))
+    tr = pandas.read_csv("raw/TurnoverRate_{}.csv".format(fund_id))
+    hs = pandas.read_csv("raw/HolderStructure_{}.csv".format(fund_id))
 
     aa.columns = ["report_date", "stock_proportion", "bond_proportion", "cash_proportion", "net_asset"]
     aa.stock_proportion = list(map(lambda x: float(x.split("%")[0]), aa.stock_proportion))
