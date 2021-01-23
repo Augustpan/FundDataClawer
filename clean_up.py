@@ -33,8 +33,8 @@ def clean_up(fund_id):
     fr.to_csv("clean/Rating_{}.csv".format(fund_id), index=0)
 
     sa["quarter"] = list(map(lambda x: "{}-{}".format(x[0], x[1]), zip(sa.Year, sa.Quarter)))
-    sa = sa.drop(["BZDM", "SZDesc", "ZJZBLDesc", "SAMMVPCTNV", "PCTCP", "SHORTNAME", "ABBNAME", "JJGSID", "FTYPE", "FUNDTYP", "FEATURE", "Year", "Quarter"], axis=1)
-    sa.columns = ["report_date", "sector_code", "sector_name", "market_value", "proportion", "date", "quarter"]
+    sa = sa.drop(["BZDM", "SZDesc", "ZJZBLDesc", "SAMMVPCTNV", "PCTCP", "SHORTNAME", "ABBNAME", "JJGSID", "FTYPE", "FUNDTYP", "FEATURE", "Year", "Quarter", "Date"], axis=1)
+    sa.columns = ["report_date", "sector_code", "sector_name", "market_value", "proportion", "quarter"]
     sa.to_csv("clean/SectorAllocation_{}.csv".format(fund_id), index=0)
 
     sh["quarter"] = list(map(lambda x: "{}-{}".format(x.split("年")[0], x.split("年")[1][0]), sh.Quarter))
@@ -48,4 +48,9 @@ def clean_up(fund_id):
     tr.to_csv("clean/TurnoverRate_{}.csv".format(fund_id), index=0)
 
     hs.columns = ["report_date", "institutional_proportion", "individual_proportion", "internal_proportion", "total_share"]
+    hs.institutional_proportion = list(map(lambda x: float(x.split("%")[0]), hs.institutional_proportion))
+    hs.individual_proportion = list(map(lambda x: float(x.split("%")[0]), hs.individual_proportion))
+    hs.internal_proportion = list(map(lambda x: float(x.split("%")[0]), hs.internal_proportion))
     hs.to_csv("clean/HolderStructure_{}.csv".format(fund_id))
+
+clean_up(110012)
