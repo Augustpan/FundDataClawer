@@ -21,7 +21,7 @@
 - SZPJ5：上海证券评级5年期
 - JAPJ：济安金信评级
 
-## SectorConfig
+## SectorAllocation
 - BZDM：基金代码
 - FSRQ：报告日期
 - HYDM：证监会行业代码

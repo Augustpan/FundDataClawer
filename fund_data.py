@@ -245,7 +245,7 @@ retrieveFundTurnoverRate(fund_id).to_csv("TurnoverRate_{}.csv".format(fund_id), 
 # 资产配置
 retrieveFundAssetAllocation(fund_id).to_csv("AssetAllocation_{}.csv".format(fund_id), index=0)
 # 行业配置
-retrieveFundSectorAllocation(fund_id).to_csv("SectorConfig_{}.csv".format(fund_id), index=0)
+retrieveFundSectorAllocation(fund_id).to_csv("SectorAllocation_{}.csv".format(fund_id), index=0)
 # 股票仓持
 retrieveFundStockHoldings(fund_id).to_csv("StockHolding_{}.csv".format(fund_id), index=0)
 # 债券仓持
