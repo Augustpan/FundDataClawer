@@ -22,6 +22,7 @@ def clean_up(fund_id):
     bh.columns = ["bond_id", "bond_name", "proportion", "market_value", "quarter", "report_date"]
     bh.proportion = list(map(lambda x: float(x.split("%")[0]), bh.proportion))
     bh.quarter = list(map(lambda x: "{}-{}".format(x.split("年")[0], x.split("年")[1][0]), bh.quarter))
+    bh.market_value = list(map(lambda x: x.replace(",", ""), bh.market_value))
     bh.to_csv("clean/BondHolding_{}.csv".format(fund_id), index=0)
 
     nav = nav.drop(["SDATE", "ACTUALSYI", "NAVTYPE", "FHFCBZ", "DTYPE", "FHSP"], axis=1)
@@ -51,6 +52,6 @@ def clean_up(fund_id):
     hs.institutional_proportion = list(map(lambda x: float(x.split("%")[0]), hs.institutional_proportion))
     hs.individual_proportion = list(map(lambda x: float(x.split("%")[0]), hs.individual_proportion))
     hs.internal_proportion = list(map(lambda x: float(x.split("%")[0]), hs.internal_proportion))
-    hs.to_csv("clean/HolderStructure_{}.csv".format(fund_id))
+    hs.to_csv("clean/HolderStructure_{}.csv".format(fund_id), index=0)
 
 clean_up(110012)
