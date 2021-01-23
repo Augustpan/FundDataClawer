@@ -4,6 +4,9 @@
 - FSRQ：净值日期
 - DWJZ：单位净值
 - LJJZ：累计净值
+- SDATE：？？
+- ACTUALSYI：？？
+- NAVTYPE：？？
 - JZZZL：日增长率，%
 - SGZT：申购状态
 - SHZT：赎回状态

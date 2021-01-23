@@ -18,7 +18,8 @@ def parseFundArchivesDatasReturn(r):
     json_str = m.group(1) \
         .replace("arryear", "\"arryear\"") \
         .replace("curyear", "\"curyear\"") \
-        .replace("content", "\"content\"")
+        .replace("content", "\"content\"") \
+        .replace("summary", "\"summary\"")
 
     return json.loads(json_str)
 
@@ -54,7 +55,7 @@ def retrieveFundNetAssetValue(fund_id):
     total_page = ret["TotalCount"] // 20
     if total_page * 20 < ret["TotalCount"]:
         total_page += 1
-
+    
     # TODO: handle exceptions
     df_return = pandas.DataFrame(ret["Data"]["LSJZList"])
 
@@ -66,6 +67,17 @@ def retrieveFundNetAssetValue(fund_id):
         df_return = pandas.concat([df_return, pandas.DataFrame(ret["Data"]["LSJZList"])])
     
     return df_return
+
+def retrieveFundHolderStructure(fund_id):
+    api_host = "http://fundf10.eastmoney.com/FundArchivesDatas.aspx"
+    
+    r = requests.get("{}?type=cyrjg&code={}".format(api_host, fund_id))
+
+    ret = parseFundArchivesDatasReturn(r)
+    soup = BeautifulSoup(ret["content"], "lxml")
+    df = parseHTMLTable(soup)
+
+    return df
 
 def retrieveFundRating(fund_id):
     api_host = "http://api.fund.eastmoney.com/F10/JJPJ/"
@@ -240,6 +252,8 @@ fund_id = 110012
 retrieveFundNetAssetValue(fund_id).to_csv("NetAssetValue_{}.csv".format(fund_id), index=0)
 # 基金评级
 retrieveFundRating(fund_id).to_csv("Rating_{}.csv".format(fund_id), index=0)
+# 持有人结构
+retrieveFundHolderStructure(fund_id).to_csv("HolderStructure_{}.csv".format(fund_id), index=0)
 # 换手率
 retrieveFundTurnoverRate(fund_id).to_csv("TurnoverRate_{}.csv".format(fund_id), index=0)
 # 资产配置
