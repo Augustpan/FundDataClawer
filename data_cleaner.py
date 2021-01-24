@@ -1,7 +1,6 @@
 # -*- coding: UTF-8 -*-
 
 import pandas
-import os
 
 def removePercentSign(col):
     def proc(x):
@@ -21,6 +20,18 @@ def removeComma(col):
             return x
     return list(map(proc, col))
 
+def dateToQuarter(col):
+    def proc(x):
+        sp = x.split("-")
+        year = sp[0]
+        quarter_map = {"01":1, "02":1, "03":1, 
+                       "04":2, "05":2, "06":2,
+                       "07":3, "08":3, "09":3,
+                       "10":4, "11":4, "12":4}
+        quarter = "{}-{}".format(year, quarter_map[sp[1]])
+        return quarter
+    return list(map(proc, col))
+
 def cleanAssetAllocation(fund_id):
     try:
         aa = pandas.read_csv("raw/AssetAllocation_{}.csv".format(fund_id))
@@ -28,6 +39,7 @@ def cleanAssetAllocation(fund_id):
         aa.stock_proportion = removePercentSign(aa.stock_proportion)
         aa.bond_proportion = removePercentSign(aa.bond_proportion)
         aa.cash_proportion = removePercentSign(aa.cash_proportion)
+        aa["quarter"] = dateToQuarter(aa.report_date)
         aa.to_csv("clean/AssetAllocation_{}.csv".format(fund_id), index=0)
         return aa
     except pandas.errors.EmptyDataError:
@@ -39,6 +51,7 @@ def cleanNetAssetValue(fund_id):
         nav = pandas.read_csv("raw/NetAssetValue_{}.csv".format(fund_id))
         nav = nav.drop(["SDATE", "ACTUALSYI", "NAVTYPE", "FHFCBZ", "DTYPE", "FHSP"], axis=1)
         nav.columns = ["report_date", "unit_net_value", "accumulated_net_value", "growth_rate", "subscription_status", "redemption_status", "bonus_per_share"]
+        nav["quarter"] = dateToQuarter(nav.report_date)
         nav.to_csv("clean/NetAssetValue_{}.csv".format(fund_id), index=0)
         return nav
     except pandas.errors.EmptyDataError:
@@ -81,6 +94,7 @@ def cleanSectorAllocation(fund_id):
     except pandas.errors.EmptyDataError:
         # TODO: hanlde empty file
         pass
+
 def cleanStockHoldings(fund_id):
     try:
         sh = pandas.read_csv("raw/StockHolding_{}.csv".format(fund_id))
@@ -95,15 +109,18 @@ def cleanStockHoldings(fund_id):
     except pandas.errors.EmptyDataError:
         # TODO: hanlde empty file
         pass
+
 def cleanTurnoverRate(fund_id):
     try:
         tr = pandas.read_csv("raw/TurnoverRate_{}.csv".format(fund_id))
         tr.columns = ["report_date", "turnover_rate"]
         tr.to_csv("clean/TurnoverRate_{}.csv".format(fund_id), index=0)
+        tr["quarter"] = dateToQuarter(tr.report_date)
         return tr
     except pandas.errors.EmptyDataError:
         # TODO: hanlde empty file
         pass
+
 def cleanHolderStructure(fund_id):
     try:
         hs = pandas.read_csv("raw/HolderStructure_{}.csv".format(fund_id))
@@ -111,6 +128,7 @@ def cleanHolderStructure(fund_id):
         hs.institutional_proportion = removePercentSign(hs.institutional_proportion)
         hs.individual_proportion = removePercentSign(hs.individual_proportion)
         hs.internal_proportion = removePercentSign(hs.internal_proportion)
+        hs["quarter"] = dateToQuarter(hs.report_date)
         hs.to_csv("clean/HolderStructure_{}.csv".format(fund_id), index=0)
         return hs
     except pandas.errors.EmptyDataError:
@@ -136,29 +154,3 @@ def exportToExcel(fund_id, list_df):
                 df.to_excel(writer, name, index=0)
             except AttributeError:
                 pass
-
-fund_id_list = ["001938","110011","007119","519697","952004"]
-for fund_id in fund_id_list:
-    aa = cleanAssetAllocation(fund_id)
-    nav = cleanNetAssetValue(fund_id)
-    fm = cleanFundManager(fund_id)
-    hs = cleanHolderStructure(fund_id)
-    tr = cleanTurnoverRate(fund_id)
-    sh = cleanStockHoldings(fund_id)
-    sa = cleanSectorAllocation(fund_id)
-    fr = cleanFundRating(fund_id)
-    bh = cleanBondHoldings(fund_id)
-
-    list_df = [
-        ("AssetAllocation", aa),
-        ("NetAssetValue", nav),
-        ("FundManager", fm),
-        ("HolderStructure", hs),
-        ("TurnoverRate", tr),
-        ("StockHoldings", sh),
-        ("SectorAllocation", sa),
-        ("FundRating", fr),
-        ("BondHoldings", bh),
-    ]
-
-    exportToExcel(fund_id, list_df)

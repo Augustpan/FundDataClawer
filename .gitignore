@@ -1,3 +1,8 @@
 
 *.csv
 *.xlsx
+*.xlsx
+*.xlsx
+*.pyc
+mysql.config
+.ipynb_checkpoints/playground-checkpoint.ipynb
