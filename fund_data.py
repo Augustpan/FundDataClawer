@@ -21,7 +21,10 @@ def parseFundArchivesDatasReturn(r):
         .replace("content", "\"content\"") \
         .replace("summary", "\"summary\"")
 
-    return json.loads(json_str)
+    # TODO: handle exceptions
+    ret = json.loads(json_str)
+    
+    return ret
 
 # parse html <table> tag into pandas DataFrame
 def parseHTMLTable(tag_table):
@@ -67,6 +70,10 @@ def retrieveFundNetAssetValue(fund_id):
         df_return = pandas.concat([df_return, pandas.DataFrame(ret["Data"]["LSJZList"])])
     
     return df_return
+
+# TODO: 
+def updateFundNetAssetValue(fund_id):
+    pass
 
 def retrieveFundHolderStructure(fund_id):
     api_host = "http://fundf10.eastmoney.com/FundArchivesDatas.aspx"
@@ -245,22 +252,61 @@ def retrieveFundTurnoverRate(fund_id):
     
     return df_return
 
-# 基金代码
-fund_id = 110012
+def retrieveFundManagerInfo(fund_id):
+    r = requests.get("http://fundf10.eastmoney.com/jjjl_{}.html".format(fund_id))
+    soup = BeautifulSoup(r.text, "lxml")
+    tag_table = soup.select_one("div.box > div.boxitem > table")
+    return parseHTMLTable(tag_table)
 
-# 基金净值
-retrieveFundNetAssetValue(fund_id).to_csv("NetAssetValue_{}.csv".format(fund_id), index=0)
-# 基金评级
-retrieveFundRating(fund_id).to_csv("Rating_{}.csv".format(fund_id), index=0)
-# 持有人结构
-retrieveFundHolderStructure(fund_id).to_csv("HolderStructure_{}.csv".format(fund_id), index=0)
-# 换手率
-retrieveFundTurnoverRate(fund_id).to_csv("TurnoverRate_{}.csv".format(fund_id), index=0)
-# 资产配置
-retrieveFundAssetAllocation(fund_id).to_csv("AssetAllocation_{}.csv".format(fund_id), index=0)
-# 行业配置
-retrieveFundSectorAllocation(fund_id).to_csv("SectorAllocation_{}.csv".format(fund_id), index=0)
-# 股票仓持
-retrieveFundStockHoldings(fund_id).to_csv("StockHolding_{}.csv".format(fund_id), index=0)
-# 债券仓持
-retrieveFundBondHoldings(fund_id).to_csv("BondHolding_{}.csv".format(fund_id), index=0)
+def retrieveAllAndSave(fund_id):
+    print("fund_id: {}".format(fund_id))
+
+    # 基金净值
+    print("retrieving fund NAV...")
+    retrieveFundNetAssetValue(fund_id).to_csv("raw/NetAssetValue_{}.csv".format(fund_id), index=0)
+    print("complete.")
+
+    # 基金评级
+    print("retrieving fund rating...")
+    retrieveFundRating(fund_id).to_csv("raw/FundRating_{}.csv".format(fund_id), index=0)
+    print("complete.")
+
+    # 持有人结构
+    print("retrieving holder structure...")
+    retrieveFundHolderStructure(fund_id).to_csv("raw/HolderStructure_{}.csv".format(fund_id), index=0)
+    print("complete.")
+
+    # 换手率
+    print("retrieving turnover rate...")
+    retrieveFundTurnoverRate(fund_id).to_csv("raw/TurnoverRate_{}.csv".format(fund_id), index=0)
+    print("complete.")
+
+    # 资产配置
+    print("retrieving asset allocation...")
+    retrieveFundAssetAllocation(fund_id).to_csv("raw/AssetAllocation_{}.csv".format(fund_id), index=0)
+    print("complete.")
+
+    # 行业配置
+    print("retrieving sector allocation...")
+    retrieveFundSectorAllocation(fund_id).to_csv("raw/SectorAllocation_{}.csv".format(fund_id), index=0)
+    print("complete.")
+
+    # 股票仓持
+    print("retrieving stock holdings...")
+    retrieveFundStockHoldings(fund_id).to_csv("raw/StockHolding_{}.csv".format(fund_id), index=0)
+    print("complete.")
+
+    # 债券仓持
+    print("retrieving bond holdings...")
+    retrieveFundBondHoldings(fund_id).to_csv("raw/BondHolding_{}.csv".format(fund_id), index=0)
+    print("complete.")
+
+    # 基金经理
+    print("retrieving fund manager info...")
+    retrieveFundManagerInfo(fund_id).to_csv("raw/FundManager_{}.csv".format(fund_id), index=0)
+    print("complete.")
+
+
+fund_id_list = ["001938","110011","007119","519697","952004"]
+for fund_id in fund_id_list:
+    retrieveAllAndSave(fund_id)
