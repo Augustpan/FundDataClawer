@@ -88,6 +88,7 @@ def cleanStockHoldings(fund_id):
         sh = sh.drop(["序号", "最新价", "涨跌幅", "相关资讯", "Quarter"], axis=1)
         sh.columns = ["stock_id", "stock_name", "proportion", "share", "market_value", "report_date", "quarter"]
         sh.proportion = removePercentSign(sh.proportion)
+        sh.share = removeComma(sh.share)
         sh.market_value = removeComma(sh.market_value)
         sh.to_csv("clean/StockHolding_{}.csv".format(fund_id), index=0)
         return sh
