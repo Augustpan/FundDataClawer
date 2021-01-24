@@ -29,6 +29,7 @@ def cleanAssetAllocation(fund_id):
         aa.bond_proportion = removePercentSign(aa.bond_proportion)
         aa.cash_proportion = removePercentSign(aa.cash_proportion)
         aa.to_csv("clean/AssetAllocation_{}.csv".format(fund_id), index=0)
+        return aa
     except pandas.errors.EmptyDataError:
         # TODO: hanlde empty file
         pass
@@ -39,6 +40,7 @@ def cleanNetAssetValue(fund_id):
         nav = nav.drop(["SDATE", "ACTUALSYI", "NAVTYPE", "FHFCBZ", "DTYPE", "FHSP"], axis=1)
         nav.columns = ["report_date", "unit_net_value", "accumulated_net_value", "growth_rate", "subscription_status", "redemption_status", "bonus_per_share"]
         nav.to_csv("clean/NetAssetValue_{}.csv".format(fund_id), index=0)
+        return nav
     except pandas.errors.EmptyDataError:
         # TODO: hanlde empty file
         pass
@@ -52,6 +54,7 @@ def cleanBondHoldings(fund_id):
         bh.quarter = list(map(lambda x: "{}-{}".format(x.split("年")[0], x.split("年")[1][0]), bh.quarter))
         bh.market_value = removeComma(bh.market_value)
         bh.to_csv("clean/BondHolding_{}.csv".format(fund_id), index=0)
+        return bh
     except pandas.errors.EmptyDataError:
         # TODO: hanlde empty file
         pass
@@ -62,6 +65,7 @@ def cleanFundRating(fund_id):
         fr = fr.drop(["FCODE", "HTPJ"], axis=1)
         fr.columns = ["report_date", "ZSPJ", "SZPJ3", "SZPJ5", "JAPJ"]
         fr.to_csv("clean/FundRating_{}.csv".format(fund_id), index=0)
+        return fr
     except pandas.errors.EmptyDataError:
         # TODO: hanlde empty file
         pass
@@ -73,6 +77,7 @@ def cleanSectorAllocation(fund_id):
         sa = sa.drop(["BZDM", "SZDesc", "ZJZBLDesc", "SAMMVPCTNV", "PCTCP", "SHORTNAME", "ABBNAME", "JJGSID", "FTYPE", "FUNDTYP", "FEATURE", "Year", "Quarter", "Date"], axis=1)
         sa.columns = ["report_date", "sector_code", "sector_name", "market_value", "proportion", "quarter"]
         sa.to_csv("clean/SectorAllocation_{}.csv".format(fund_id), index=0)
+        return sa
     except pandas.errors.EmptyDataError:
         # TODO: hanlde empty file
         pass
@@ -85,6 +90,7 @@ def cleanStockHoldings(fund_id):
         sh.proportion = removePercentSign(sh.proportion)
         sh.market_value = removeComma(sh.market_value)
         sh.to_csv("clean/StockHolding_{}.csv".format(fund_id), index=0)
+        return sh
     except pandas.errors.EmptyDataError:
         # TODO: hanlde empty file
         pass
@@ -93,6 +99,7 @@ def cleanTurnoverRate(fund_id):
         tr = pandas.read_csv("raw/TurnoverRate_{}.csv".format(fund_id))
         tr.columns = ["report_date", "turnover_rate"]
         tr.to_csv("clean/TurnoverRate_{}.csv".format(fund_id), index=0)
+        return tr
     except pandas.errors.EmptyDataError:
         # TODO: hanlde empty file
         pass
@@ -104,9 +111,11 @@ def cleanHolderStructure(fund_id):
         hs.individual_proportion = removePercentSign(hs.individual_proportion)
         hs.internal_proportion = removePercentSign(hs.internal_proportion)
         hs.to_csv("clean/HolderStructure_{}.csv".format(fund_id), index=0)
+        return hs
     except pandas.errors.EmptyDataError:
         # TODO: hanlde empty file
         pass
+
 def cleanFundManager(fund_id):
     try:
         fm = pandas.read_csv("raw/FundManager_{}.csv".format(fund_id))
@@ -114,18 +123,41 @@ def cleanFundManager(fund_id):
         fm.columns = ["start_date", "expiry_date", "manager_name", "return_rate"]
         fm.return_rate = removePercentSign(fm.return_rate)
         fm.to_csv("clean/FundManager_{}.csv".format(fund_id), index=0)
+        return fm
     except pandas.errors.EmptyDataError:
         # TODO: hanlde empty file
         pass
 
+def exportToExcel(fund_id, list_df):
+    with pandas.ExcelWriter("excel_export/{}.xlsx".format(fund_id)) as writer:
+        for name, df in list_df:
+            try:
+                df.to_excel(writer, name, index=0)
+            except AttributeError:
+                pass
+
 fund_id_list = ["001938","110011","007119","519697","952004"]
 for fund_id in fund_id_list:
-    cleanAssetAllocation(fund_id)
-    cleanNetAssetValue(fund_id)
-    cleanFundManager(fund_id)
-    cleanHolderStructure(fund_id)
-    cleanTurnoverRate(fund_id)
-    cleanStockHoldings(fund_id)
-    cleanSectorAllocation(fund_id)
-    cleanFundRating(fund_id)
-    cleanBondHoldings(fund_id)
+    aa = cleanAssetAllocation(fund_id)
+    nav = cleanNetAssetValue(fund_id)
+    fm = cleanFundManager(fund_id)
+    hs = cleanHolderStructure(fund_id)
+    tr = cleanTurnoverRate(fund_id)
+    sh = cleanStockHoldings(fund_id)
+    sa = cleanSectorAllocation(fund_id)
+    fr = cleanFundRating(fund_id)
+    bh = cleanBondHoldings(fund_id)
+
+    list_df = [
+        ("AssetAllocation", aa),
+        ("NetAssetValue", nav),
+        ("FundManager", fm),
+        ("HolderStructure", hs),
+        ("TurnoverRate", tr),
+        ("StockHoldings", sh),
+        ("SectorAllocation", sa),
+        ("FundRating", fr),
+        ("BondHoldings", bh),
+    ]
+
+    exportToExcel(fund_id, list_df)
