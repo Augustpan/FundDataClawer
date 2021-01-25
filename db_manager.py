@@ -37,6 +37,9 @@ def updateAssetAllocation(fund_id):
         if not pandas.isna(row.cash_proportion):
             fields = "{},{}".format(fields, "CASH_PROP")
             values = "{},{}".format(values, row.cash_proportion)
+        if not pandas.isna(row.deposit_proportion):
+            fields = "{},{}".format(fields, "DEPO_PROP")
+            values = "{},{}".format(values, row.deposit_proportion)
         if not pandas.isna(row.cash_proportion):
             fields = "{},{}".format(fields, "NET_ASSET_VALUE")
             values = "{},{}".format(values, row.net_asset)
@@ -216,15 +219,18 @@ def updateBondHoldings(fund_id):
     mycursor = mydb.cursor()
 
     for _, row in bh.iterrows():
-        fields = "REPORT_DATE,FUND_ID,BOND_ID,BOND_NAME,BOND_SPEC_PROP,BOND_SPEC_VALUE"
-        values = "'{}','{}','{}','{}',{},{}".format(
+        fields = "REPORT_DATE,FUND_ID,BOND_ID,BOND_NAME"
+        values = "'{}','{}','{}','{}'".format(
             row.report_date, 
             fund_id,
             row.bond_id,
-            row.bond_name,
-            row.proportion,
-            row.market_value
+            row.bond_name
         )
+        if not pandas.isna(row.proportion):
+            fields = "{},{}".format(fields, "BOND_SPEC_PROP")
+            values = "{},{}".format(values, row.proportion)
+        fields = "{},{}".format(fields, "BOND_SPEC_VALUE")
+        values = "{},{}".format(values, row.market_value)
         try:
             mycursor.execute("INSERT INTO BOND_HOLDINGS ({}) VALUES ({})".format(fields, values))
             mydb.commit()
@@ -278,8 +284,6 @@ def updateStockHoldings(fund_id):
         except mysql.connector.errors.IntegrityError:
             # record existed
             pass
-        except:
-            print(values)
 
     mycursor.close()
     mydb.close()

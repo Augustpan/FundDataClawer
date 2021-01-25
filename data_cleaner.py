@@ -13,7 +13,11 @@ def removePercentSign(col):
 
 def removeComma(col):
     def proc(x):
-        x = x.replace(",", "")
+        try:
+            x = x.replace(",", "")
+        except AttributeError:
+            # x is float
+            return x
         if x == "---":
             return
         else:
@@ -35,13 +39,22 @@ def dateToQuarter(col):
 def cleanAssetAllocation(fund_id):
     try:
         aa = pandas.read_csv("raw/AssetAllocation_{}.csv".format(fund_id))
-        aa.columns = ["report_date", "stock_proportion", "bond_proportion", "cash_proportion", "net_asset"]
-        aa.stock_proportion = removePercentSign(aa.stock_proportion)
-        aa.bond_proportion = removePercentSign(aa.bond_proportion)
-        aa.cash_proportion = removePercentSign(aa.cash_proportion)
-        aa["quarter"] = dateToQuarter(aa.report_date)
-        aa.to_csv("clean/AssetAllocation_{}.csv".format(fund_id), index=0)
-        return aa
+        new_aa = pandas.DataFrame()
+        new_aa["net_asset"] =  removeComma(aa["净资产（亿元）"])
+        new_aa["stock_proportion"] = removePercentSign(aa["股票占净比"])
+        new_aa["cash_proportion"] = removePercentSign(aa["现金占净比"])
+        if "债券占净比" in aa.columns:
+            new_aa["bond_proportion"] = removePercentSign(aa["债券占净比"])
+        else:
+            new_aa["bond_proportion"] = None
+        if "存托凭证占净比" in aa.columns:
+            new_aa["deposit_proportion"] = removePercentSign(aa["存托凭证占净比"])
+        else:
+            new_aa["deposit_proportion"] = None
+        new_aa["report_date"] = aa["报告期"]
+        new_aa["quarter"] = dateToQuarter(aa["报告期"])
+        new_aa.to_csv("clean/AssetAllocation_{}.csv".format(fund_id), index=0)
+        return new_aa
     except pandas.errors.EmptyDataError:
         # TODO: hanlde empty file
         pass
@@ -129,6 +142,7 @@ def cleanHolderStructure(fund_id):
         hs.individual_proportion = removePercentSign(hs.individual_proportion)
         hs.internal_proportion = removePercentSign(hs.internal_proportion)
         hs["quarter"] = dateToQuarter(hs.report_date)
+        hs.total_share = removeComma(hs.total_share)
         hs.to_csv("clean/HolderStructure_{}.csv".format(fund_id), index=0)
         return hs
     except pandas.errors.EmptyDataError:
