@@ -267,14 +267,19 @@ def updateStockHoldings(fund_id):
         if not pandas.isna(row.proportion):
             fields = "{},{}".format(fields, "STOCK_SPEC_PROP")
             values = "{},{}".format(values, row.proportion)
-        fields = "{},{},{}".format(fields, "STOCK_SPEC_SHARE", "STOCK_SPEC_VALUE")
-        values = "{},{},{}".format(values, row.share, row.market_value)
+        fields = "{},{}".format(fields, "STOCK_SPEC_SHARE")
+        values = "{},{}".format(values, row.share)
+        if not pandas.isna(row.market_value):
+            fields = "{},{}".format(fields, "STOCK_SPEC_VALUE")
+            values = "{},{}".format(values, row.market_value)
         try:
             mycursor.execute("INSERT INTO STOCK_HOLDINGS ({}) VALUES ({})".format(fields, values))
             mydb.commit()
         except mysql.connector.errors.IntegrityError:
             # record existed
             pass
+        except:
+            print(values)
 
     mycursor.close()
     mydb.close()

@@ -40,7 +40,7 @@ def saveAllToDatabase(fund_id):
     updateStockHoldings(fund_id)
     updateSectorAllocation(fund_id)
 
-fund_id_list = ["001938","110011","110012","519697","952004"]
+fund_id_list = ["001938","110011","110012","519697","952004","007119"]
 for fund_id in fund_id_list:
     #retrieveAllAndSave(fund_id)
     cleanAllAndSave(fund_id)
